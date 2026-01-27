@@ -49,13 +49,27 @@ namespace Projet_Pricer
                 Console.WriteLine($"{t} vol hist = {HistoricalStats.AnnualizedVol(rets[t]):P2}");
 
             // Assets : spot = dernier PX_LAST, q=0, volConst = vol hist annualisée (sert H1 full)
+            // --- 1) Demande à l'utilisateur le dividende q à appliquer à tous les actifs ---
+            double qUser;
+            while (true)
+            {
+                Console.Write("Entrez le dividende q à appliquer à tous les actifs (ex: 0.02) : ");
+                string input = Console.ReadLine();
+
+                if (double.TryParse(input, out qUser))
+                    break; // valeur valide
+                Console.WriteLine("Valeur invalide, veuillez entrer un nombre valide !");
+            }
+
+            // --- 2) Création des assets ---
             var assets = new List<Asset>();
             foreach (var t in tickers)
             {
                 double spot = prices.Last().Value[t];
                 double vol = HistoricalStats.AnnualizedVol(rets[t]);
-                assets.Add(new Asset(t, spot, q: 0.0, volConst: vol));
+                assets.Add(new Asset(t, spot, q: qUser, volConst: vol));
             }
+
 
             // Basket équipondéré
             double[] w = Enumerable.Repeat(1.0 / tickers.Count, tickers.Count).ToArray();
