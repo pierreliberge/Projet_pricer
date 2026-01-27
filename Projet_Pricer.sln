@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36511.14 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Projet_Pricer", "Projet_Pricer\Projet_Pricer.csproj", "{056DBB1D-D496-4559-B843-39E6DA3D1DFD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{056DBB1D-D496-4559-B843-39E6DA3D1DFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{056DBB1D-D496-4559-B843-39E6DA3D1DFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{056DBB1D-D496-4559-B843-39E6DA3D1DFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{056DBB1D-D496-4559-B843-39E6DA3D1DFD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {963340BD-B461-4F43-9272-D859B42EE5CA}
+	EndGlobalSection
+EndGlobal
