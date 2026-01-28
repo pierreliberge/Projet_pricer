@@ -203,5 +203,104 @@ namespace Projet_Pricer
                 return res;
             }
         }
+        // ============================================================
+        // 3) TAUX: Excel "TAUX" (Tenor | Yield)
+        // Tenor: 3M, 6M, 1Y, ...
+        // Yield: en %, format FR (ex 2,213)
+        // Retourne: RateCurve (t en années, z en décimal)
+        // ============================================================
+        public static RateCurve LoadRateCurveFromExcel(
+            string xlsxPath,
+            string sheetName = "TAUX",
+            string tenorCol = "Tenor",
+            string yieldCol = "Yield")
+        {
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+            using (var stream = File.Open(xlsxPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = ExcelReaderFactory.CreateReader(stream))
+            {
+                var ds = reader.AsDataSet(new ExcelDataSetConfiguration
+                {
+                    ConfigureDataTable = _ => new ExcelDataTableConfiguration
+                    {
+                        UseHeaderRow = true
+                    }
+                });
+
+                var table = ds.Tables[sheetName]
+                    ?? throw new ArgumentException($"Sheet '{sheetName}' not found.");
+
+                if (!table.Columns.Contains(tenorCol) || !table.Columns.Contains(yieldCol))
+                    throw new ArgumentException(
+                        $"Sheet '{sheetName}' must contain columns '{tenorCol}' and '{yieldCol}'.");
+
+                var points = new List<(double t, double z)>();
+
+                foreach (DataRow row in table.Rows)
+                {
+                    if (row[tenorCol] == DBNull.Value || row[yieldCol] == DBNull.Value)
+                        continue;
+
+                    // ---------- Tenor ----------
+                    string tenorStr = row[tenorCol].ToString().Trim().ToUpper();
+                    if (string.IsNullOrWhiteSpace(tenorStr))
+                        continue;
+
+                    double t;
+                    if (tenorStr.EndsWith("M"))
+                    {
+                        if (!double.TryParse(tenorStr.Replace("M", ""),
+                                NumberStyles.Float,
+                                CultureInfo.InvariantCulture,
+                                out double months))
+                            continue;
+
+                        t = months / 12.0;
+                    }
+                    else if (tenorStr.EndsWith("Y"))
+                    {
+                        if (!double.TryParse(tenorStr.Replace("Y", ""),
+                                NumberStyles.Float,
+                                CultureInfo.InvariantCulture,
+                                out double years))
+                            continue;
+
+                        t = years;
+                    }
+                    else
+                    {
+                        continue; // tenor inconnu
+                    }
+
+                    if (t <= 0) continue;
+
+                    // ---------- Yield (%) ----------
+                    string yieldStr = row[yieldCol].ToString().Trim();
+
+                    if (!double.TryParse(yieldStr,
+                            NumberStyles.Float,
+                            CultureInfo.GetCultureInfo("fr-FR"),
+                            out double yieldPct))
+                    {
+                        if (!double.TryParse(yieldStr,
+                                NumberStyles.Float,
+                                CultureInfo.InvariantCulture,
+                                out yieldPct))
+                            continue;
+                    }
+
+                    double z = yieldPct / 100.0; // % -> décimal
+
+                    points.Add((t, z));
+                }
+
+                if (points.Count < 2)
+                    throw new Exception("Not enough rate points (need >= 2).");
+
+                return RateCurve.FromZeroRates(points.OrderBy(p => p.t).ToList());
+            }
+        }
+
     }
 }
